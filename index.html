@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner-Crx-Server · 扩展托管</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f6f8fa;
+            display: flex;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        /* ===== 侧边栏 ===== */
+        .sidebar {
+            width: 280px;
+            background: #ffffff;
+            border-right: 1px solid #e9ecf0;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #0f172a;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar .logo span {
+            background: #2563eb;
+            color: white;
+            font-size: 14px;
+            padding: 0 12px;
+            border-radius: 20px;
+            line-height: 28px;
+            font-weight: 500;
+        }
+
+        .sidebar .sub {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 20px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar nav ul li a {
+            display: block;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #334155;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .sidebar nav ul li a:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .sidebar nav ul li a.active {
+            background: #eef2ff;
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 24px;
+            border-top: 1px solid #f1f5f9;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .sidebar-footer a {
+            color: #64748b;
+            text-decoration: none;
+        }
+
+        .sidebar-footer a:hover {
+            color: #2563eb;
+        }
+
+        /* ===== 主内容 ===== */
+        .main {
+            flex: 1;
+            padding: 40px 48px;
+            max-width: 1100px;
+        }
+
+        .main-header {
+            margin-bottom: 32px;
+        }
+
+        .main-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #0f172a;
+        }
+
+        .main-header p {
+            color: #64748b;
+            font-size: 16px;
+            margin-top: 4px;
+        }
+
+        /* ===== 卡片网格 ===== */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e9ecf0;
+            transition: box-shadow 0.2s, transform 0.1s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
+        }
+
+        .card .name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card .name .badge {
+            font-size: 12px;
+            font-weight: 500;
+            background: #f1f5f9;
+            padding: 2px 12px;
+            border-radius: 20px;
+            color: #475569;
+        }
+
+        .card .id {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            color: #64748b;
+            background: #f8fafc;
+            padding: 4px 12px;
+            border-radius: 6px;
+            margin: 10px 0 6px;
+            word-break: break-all;
+        }
+
+        .card .meta {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            color: #475569;
+            margin: 8px 0 16px;
+        }
+
+        .card .meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .card .actions a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+
+        .card .actions .download {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .card .actions .download:hover {
+            background: #1d4ed8;
+        }
+
+        .card .actions .xml {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .card .actions .xml:hover {
+            background: #e2e8f0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state .emoji {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid #e9ecf0;
+                padding: 20px;
+            }
+            .main {
+                padding: 24px 20px;
+            }
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 侧边栏 ===== -->
+    <aside class="sidebar">
+        <div class="logo">
+            📦 Owner-Crx-Server
+            <span>v1</span>
+        </div>
+        <div class="sub">Chrome 扩展托管仓库 · 企业部署</div>
+
+        <nav>
+            <ul>
+                <li><a href="#" class="active">📋 扩展列表</a></li>
+                <li><a href="https://github.com/Yunlv-L/Owner-Crx-Server" target="_blank">🐙 GitHub 仓库</a></li>
+                <li><a href="https://yunlv-l.github.io/Owner-Crx-Server/Windows-Helper-update.xml" target="_blank">📄 更新清单示例</a></li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>由 <a href="https://github.com/Yunlv-L" target="_blank">Yunlv-L</a> 维护<br>仅供内部使用</p>
+        </div>
+    </aside>
+
+    <!-- ===== 主内容 ===== -->
+    <main class="main">
+        <div class="main-header">
+            <h1>📦 扩展列表</h1>
+            <p>当前托管的所有 Chrome 扩展包（.crx）及对应的更新清单。</p>
+        </div>
+
+        <div class="cards" id="extensionList">
+            <!-- 通过 JavaScript 动态生成，方便维护 -->
+        </div>
+    </main>
+
+    <script>
+        // ==================== 数据 ====================
+        const extensions = [{
+            id: 'bnbgojciddcmgglehplimopaoennepjl',
+            name: 'Windows Helper',
+            version: '1.0',
+            description: '窗口辅助工具，用于改善浏览体验。',
+            updated: '2026-08-16',
+            file: 'Windows-Helper.crx',
+            xml: 'Windows-Helper-update.xml'
+        }];
+
+        // 替换为您的实际 GitHub Pages 根地址
+        const BASE_URL = 'https://yunlv-l.github.io/Owner-Crx-Server/';
+
+        // ==================== 渲染 ====================
+        function render() {
+            const container = document.getElementById('extensionList');
+
+            if (extensions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="emoji">🫙</div>
+                        <h3>暂无扩展</h3>
+                        <p>请上传 .crx 文件并更新数据。</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = extensions.map(ext => `
+                <div class="card">
+                    <div class="name">
+                        ${ext.name}
+                        <span class="badge">v${ext.version}</span>
+                    </div>
+                    <div class="id">ID: ${ext.id}</div>
+                    <div class="meta">
+                        <span>📅 ${ext.updated}</span>
+                        <span>📄 ${ext.file}</span>
+                    </div>
+                    <div style="font-size:14px;color:#64748b;margin-bottom:8px;">${ext.description || ''}</div>
+                    <div class="actions">
+                        <a href="${BASE_URL}${ext.file}" class="download" download>⬇️ 下载 CRX</a>
+                        <a href="${BASE_URL}${ext.xml}" class="xml" target="_blank">📋 更新清单</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        render();
+    </script>
+
+</body>
+</html>
